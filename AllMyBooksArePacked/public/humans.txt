@@ -1,0 +1,14 @@
+/* TEAM */
+Developer: Manuel Avelar
+Site: manuel[at]pixelcreart.net, http://mavelar.com
+Twitter: @mavelar
+Location: San Pedro Sula, Honduras
+
+/* THANKS */
+Name: Gustavo Migoya
+
+/* SITE */
+Last update: 2015/11/12
+Standards: HTML5, CSS3, PHP
+Components: Modernizr, jQuery, RequireJS, Composer, Gulp, SlimPHP
+Software: Sublime Text 3, Photoshop

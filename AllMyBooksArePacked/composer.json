@@ -1,0 +1,19 @@
+{
+	"name": "Desarrollos Energeticos y Ambiente Website",
+  "description": "HTML5/CSS Responsive Website",
+  "keywords": ["html5","website","industry"],
+  "authors": [
+    {
+      "name": "Manuel Avelar",
+      "email": "manuel@pixelcreart.net",
+      "homepage": "http://www.pixelcreart.com"
+    }
+  ],
+  "require": {
+    "slim/slim": "~2.5",
+    "slim/views": "0.1.*",
+    "slim/middleware": "*",
+    "twig/twig": "1.*",
+    "pimple/pimple": "~3.0"
+  }
+}
