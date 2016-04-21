@@ -1,69 +1,100 @@
 <?
 	// HOME
 	$app->get('/', function() use ($app) {
-		$variables = array();
+		$boxes = array();
+		$boxes["box"] = array();
+		$books = array();
+
+		// DATA FOLDER
 		$dirPath = '../data';
   	$booksList = array_diff(scandir($dirPath), array('..', '.'));
-		$output = array();
-		$output["box"] = array();
-		$counter = 1;
-		
+
+		// Iteration for books
 		foreach ($booksList as $book) {
 			$bookContent = array();
-			$bookContent["id"] = $counter;
-			$bookContent["content"] = array();
+			$bookContent["author"] = "";
+
+			// OPEN EACH BOOK FOUND IN FOLDER DATA
+			$handle = fopen("../data/".$book,"r");
 			
-			$fp = fopen("../data/".$book,"r");
-		
-			$content = "";
-		
-			while(!feof($fp)) {
-				$line = fgets($fp, 1024);
-				$content .= $line;
-				
-				// AUTHOR
-				if(strstr($line,'field-author')) {
-					preg_match_all('/<a href=\"(.*|field\-author)\">(.*)<\/a>/',$line,$author,PREG_SET_ORDER);
-					$bookContent["content"]["author"] = $author[0][2];
+			if($handle) {
+				$content = "";
+
+				// ITERATE EACH LINE IN FILE
+				while(!feof($handle)) {
+					$line = fgets($handle, 1024);
+					$content .= $line;
+
+					// AUTHOR
+					if(strstr($line,'field-author')) {
+						preg_match_all('/<a href=\"(.*|field\-author)\">(.*)<\/a>/',$line,$author,PREG_SET_ORDER);
+						$bookContent["author"] = $author[0][2];
+					}
 				}
 			}
 			
-			fclose($fp);
-			
-			preg_match_all("/Weight:<\/b> ([0-9][.][0-9] \w+)/", $content, $pounds, PREG_SET_ORDER);
-			$bookContent["totalWeight"] = $pounds[0][1];
-			$bookContent["content"]["shipping_weight"] = $pounds[0][1];
+			// CLOSING FILE
+			fclose($handle);
+						
+			// SEARCH POUNDS
+			preg_match_all("/Weight:<\/b> ([0-9][.][0-9])/", $content, $pounds, PREG_SET_ORDER);
+			$bookContent["shipping_weight"] = $pounds[0][1]." pounds";
 			
 			// PRICES
 			preg_match_all("/([$][0-9]*[,]*[.][0-9]{2})/", $content, $prices, PREG_SET_ORDER);
-			$bookContent["content"]["price"] = $prices[0][0]." USD";
+			$bookContent["price"] = $prices[0][0]." USD";
 			
 			// BOOK TITLE
 			preg_match_all('/<span id=\"btAsinTitle\"(.*?)span>/',$content,$title,PREG_SET_ORDER);		
-			$bookContent["content"]["title"] = trim(preg_replace('/(<([^>]+)>|>|<\/)/','',$title[0][1]));
+			$bookContent["title"] = trim(preg_replace('/(<([^>]+)>|>|<\/)/','',$title[0][1]));
 			
 			// ISBN-10
 			preg_match_all("/ISBN\-10:<\/b> (\d\w+)/", $content, $isbn10, PREG_SET_ORDER);
-			$bookContent["content"]["isbn-10"] = trim($isbn10[0][1]);
-			
-			array_push($output["box"],$bookContent);
-			
-			$counter++;
+			$bookContent["isbn-10"] = trim($isbn10[0][1]);
+
+			array_push($books,$bookContent);
 		}
-		
-		/*
-		$variables = array(
-			'currentpage' => 	'home',
-			'properties' => array(
-				'title' 	=>	'Servicios Especializados, Monitoreo Fuentes Fijas y Móviles, Auditoría Energética, Monitoreo Ocupacional'
-			),
-			'widgetsData' => 	$widgetsData,
-			'sliderData'	=>	$sliderData,
-			'projectsData'	=>	$projectsData
-		);
-		*/
+
+		$boxes = buildBoxes($boxes,$books);
 
   	$app->response()->header("Content-Type", "application/json");
-		echo json_encode($output);
+		echo json_encode($boxes);
   });
+
+	function saveInABox($boxes,$book) {
+		$boxId = 1;
+
+		$boxes = buildBoxes($boxes,$book);
+
+		return $boxes;
+  }
+
+  function buildBox($boxId,$book) {
+  	$box = array();
+  	$box["id"] = $boxId;
+		$box["content"] = array();
+		$box["totalWeight"] = 0;
+
+  	return $box;
+  }
+
+  function buildBoxes($boxes,$books) {
+  	$totalWeight = 0;
+  	$totalBoxesNeeded = 0;
+  	$maxWeightPerBoxes = 10;
+
+  	foreach ($books as $bookId => $book) {
+  		$totalWeight += $book["shipping_weight"];
+  	}
+
+  	$totalBoxesNeeded = ceil($totalWeight/$maxWeightPerBoxes);
+
+  	$i=0;
+  	while ($i <= $totalBoxesNeeded) {
+		  buildBox();
+		  $i++;
+		}
+
+ 		return $boxes;
+  }
 ?>

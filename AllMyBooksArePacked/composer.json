@@ -1,19 +1,19 @@
 {
-	"name": "Desarrollos Energeticos y Ambiente Website",
-  "description": "HTML5/CSS Responsive Website",
-  "keywords": ["html5","website","industry"],
+	"name": "Test Project for RenovatioCloud",
+  "description": "HTML5/CSS",
+  "keywords": ["html5","website"],
   "authors": [
     {
       "name": "Manuel Avelar",
       "email": "manuel@pixelcreart.net",
-      "homepage": "http://www.pixelcreart.com"
+      "homepage": "http://www.mavelar.com"
     }
   ],
   "require": {
-    "slim/slim": "~2.5",
-    "slim/views": "0.1.*",
+    "slim/slim": "*",
+    "slim/views": "*",
     "slim/middleware": "*",
-    "twig/twig": "1.*",
-    "pimple/pimple": "~3.0"
+    "twig/twig": "*",
+    "pimple/pimple": "*"
   }
 }

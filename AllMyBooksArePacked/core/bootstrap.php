@@ -1,4 +1,6 @@
 <?
+	session_start();
+
 	$app = new \Slim\Slim(array(
 		'mode' => 'development',
 		'templates.path' => '../templates',
