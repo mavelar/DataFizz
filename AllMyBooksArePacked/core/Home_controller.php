@@ -1,9 +1,11 @@
 <?
 	// HOME
 	$app->get('/', function() use ($app) {
-		$boxes = array();
-		$boxes["box"] = array();
-		$books = array();
+		$GLOBALS["boxes"] = array();
+		$GLOBALS["boxes"]["box"] = array();
+		$GLOBALS["boxes"]["globalWeight"] = 0;
+		$GLOBALS["boxes"]["totalItems"] = 0;
+		$GLOBALS["books"] = array();
 
 		// DATA FOLDER
 		$dirPath = '../data';
@@ -52,24 +54,48 @@
 			preg_match_all("/ISBN\-10:<\/b> (\d\w+)/", $content, $isbn10, PREG_SET_ORDER);
 			$bookContent["isbn-10"] = trim($isbn10[0][1]);
 
-			array_push($books,$bookContent);
+			array_push($GLOBALS["books"],$bookContent);
 		}
 
-		$boxes = buildBoxes($boxes,$books);
+		buildBoxes();
+		fillOutBoxes();
 
   	$app->response()->header("Content-Type", "application/json");
-		echo json_encode($boxes);
+		echo json_encode($GLOBALS["boxes"]);
   });
 
-	function saveInABox($boxes,$book) {
-		$boxId = 1;
+	function fillOutBoxes() {
+		$GLOBALS["booksBoxed"] = -1;
 
-		$boxes = buildBoxes($boxes,$book);
-
-		return $boxes;
+		foreach ($GLOBALS["books"] as $bookId => $book) {
+			saveBookInBox($bookId,$book);
+		}
   }
 
-  function buildBox($boxId,$book) {
+  function saveBookInBox($bookId,$book) {
+  		setBox($bookId,$book);
+  }
+
+  function setBox($bookId,$book) {
+  	$newTotalWeight = 0;
+
+  	foreach($GLOBALS["boxes"]["box"] as $boxId => $box) {
+  		if($bookId!=$GLOBALS["booksBoxed"]) {
+	  		$newTotalWeight = $box["totalWeight"]+$book["shipping_weight"];
+
+	  		if($newTotalWeight<=10) {
+	  			array_push($GLOBALS["boxes"]["box"][$boxId]["content"],$book);
+	  			$GLOBALS["boxes"]["box"][$boxId]["totalWeight"]+=$book["shipping_weight"];
+
+	  			$GLOBALS["booksBoxed"]++;
+	  			$GLOBALS["boxes"]["totalItems"]++;
+	  			$GLOBALS["boxes"]["globalWeight"] += $book["shipping_weight"];
+	  		}
+	  	}
+  	}
+  }
+
+  function buildBox($boxId) {
   	$box = array();
   	$box["id"] = $boxId;
 		$box["content"] = array();
@@ -78,23 +104,22 @@
   	return $box;
   }
 
-  function buildBoxes($boxes,$books) {
+  function buildBoxes() {
   	$totalWeight = 0;
   	$totalBoxesNeeded = 0;
   	$maxWeightPerBoxes = 10;
 
-  	foreach ($books as $bookId => $book) {
+  	foreach ($GLOBALS["books"] as $bookId => $book) {
   		$totalWeight += $book["shipping_weight"];
   	}
 
   	$totalBoxesNeeded = ceil($totalWeight/$maxWeightPerBoxes);
 
-  	$i=0;
+  	$i=1;
   	while ($i <= $totalBoxesNeeded) {
-		  buildBox();
+		  $box = buildBox($i);
+		  array_push($GLOBALS["boxes"]["box"],$box);
 		  $i++;
 		}
-
- 		return $boxes;
   }
 ?>
